@@ -1,0 +1,164 @@
+# This is an example .goreleaser.yml file with some sensible defaults.
+# Make sure to check the documentation at https://goreleaser.com
+
+# The lines below are called `modelines`. See `:help modeline`
+# Feel free to remove those if you don't want/need to use them.
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+# vim: set ts=2 sw=2 tw=0 fo=cnqoj
+
+version: 2
+
+before:
+  hooks:
+    # You may remove this if you don't use go modules.
+    - go mod tidy
+    # you may remove this if you don't need go generate
+    - go generate ./...
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+
+    binary: formatdataform
+
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+
+    # Custom ldflags.
+    #
+    # Default: '-s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=goreleaser'
+    # Templates: allowed
+    # ldflags:
+    #   - '-s -w -X "github.com/ashish10alex/dj/internal/version.buildDate={{ .Env.BUILD_DATE }}" -X "github.com/ashish10alex/dj/internal/version.gitCommit={{ .Env.GIT_COMMIT }}" -X "github.com/ashish10alex/dj/internal/version.gitVersion={{ .Env.VERSION }}" '
+
+# .goreleaser.yml
+changelog:
+
+  # Changelog generation implementation to use.
+  #
+  # Valid options are:
+  # - `git`: uses `git log`;
+  # - `github`: uses the compare GitHub API, appending the author username to the changelog.
+  # - `gitlab`: uses the compare GitLab API, appending the author name and email to the changelog (requires a personal access token).
+  # - `gitea`: uses the compare Gitea API, appending the author username to the changelog.
+  # - `github-native`: uses the GitHub release notes generation API, disables the groups feature.
+  #
+  # Default: 'git'.
+  use: git
+
+  # Format to use for commit formatting.
+  # Only available when use is one of `github`, `gitea`, or `gitlab`.
+  #
+  # Default: '{{ .SHA }}: {{ .Message }} ({{ with .AuthorUsername }}@{{ . }}{{ else }}{{ .AuthorName }} <{{ .AuthorEmail }}>{{ end }})'.
+  # Extra template fields: `SHA`, `Message`, `AuthorName`, `AuthorEmail`, and
+  # `AuthorUsername`.
+  # format: "{{.SHA}}: {{.Message}} (@{{.AuthorUsername}})"
+
+  # Sorts the changelog by the commit's messages.
+  # Could either be asc, desc or empty
+  # Empty means 'no sorting', it'll use the output of `git log` as is.
+  # sort: asc
+
+  # Max commit hash length to use in the changelog.
+  #
+  # 0: use whatever the changelog implementation gives you
+  # -1: remove the commit hash from the changelog
+  # any other number: max length.
+  # abbrev: -1
+
+  # Paths to filter the commits for.
+  # Only works when `use: git`, otherwise ignored.
+  #
+  # This feature is only available in GoReleaser Pro.
+  # Default: monorepo.dir value, or empty if no monorepo.
+  # paths:
+  #   - foo/
+  #   - bar/
+
+  # Group commits messages by given regex and title.
+  # Order value defines the order of the groups.
+  # Providing no regex means all commits will be grouped under the default group.
+  #
+  # Matches are performed against the first line of the commit message only,
+  # prefixed with the commit SHA1, usually in the form of
+  # `<abbrev-commit>[:] <title-commit>`.
+  # Groups are disabled when using github-native, as it already groups things by itself.
+  # Regex use RE2 syntax as defined here: https://github.com/google/re2/wiki/Syntax.
+  groups:
+    - title: Features
+      regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
+      order: 0
+    - title: "Bug fixes"
+      regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
+      order: 1
+    - title: Others
+      order: 999
+
+      # A group can have subgroups.
+      # If you use this, all the commits that match the parent group will also
+      # be checked against its subgroups. If some of them matches, it'll be
+      # grouped there, otherwise they'll remain not grouped.
+      #
+      # The title is optional - you can think of groups as a way to order
+      # commits within a group.
+      #
+      # There can only be one level of subgroups, i.e.: a subgroup can't have
+      # subgroups within it.
+      #
+      # This feature is only available in GoReleaser Pro.
+      # groups:
+      #   - title: "Docs"
+      #     regex: ".*docs.*"
+      #     order: 1
+      #   - title: "CI"
+      #     regex: ".*build.*"
+      #     order: 2
+
+  # Divider to use between groups.
+  #
+  # This feature is only available in GoReleaser Pro.
+  # divider: "---"
+
+  filters:
+    # Commit messages matching the regexp listed here will be removed from
+    # the changelog
+    #
+    # Matches are performed against the first line of the commit message only,
+    # prefixed with the commit SHA1, usually in the form of
+    # `<abbrev-commit>[:] <title-commit>`.
+    exclude:
+      - "^docs:"
+      - typo
+      - (?i)foo
+
+    # Commit messages matching the regexp listed here will be the only ones
+    # added to the changelog
+    #
+    # If include is not-empty, exclude will be ignored.
+    #
+    # Matches are performed against the first line of the commit message only,
+    # prefixed with the commit SHA1, usually in the form of
+    # `<abbrev-commit>[:] <title-commit>`.
+    include:
+      - "^feat:"
+      - "^fix:"
+
+archives:
+  - format: tar.gz
+    # this name template makes the OS and Arch compatible with the results of `uname`.
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    # use zip for windows archives
+    format_overrides:
+      - goos: windows
+        format: zip
+

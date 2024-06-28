@@ -1,0 +1,34 @@
+name: goreleaser
+
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+
+jobs:
+  goreleaser:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      -
+        name: Install GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          install-only: true
+      -
+        name: Show GoReleaser version
+        run: goreleaser -v
+
+      -
+        name: Run releaser for testing
+        run: chmod +x ./release.sh; ./release.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

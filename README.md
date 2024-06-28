@@ -4,7 +4,7 @@
 
 Format `.sqlx` files in your Dataform project
 
-**Setup necessary files to support formatting**
+**Setup necessary files to support formatting** ( needs to be done just once for a Dataform project )
 
 ```bash
 formatdataform setup

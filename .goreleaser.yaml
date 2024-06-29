@@ -32,8 +32,8 @@ builds:
     #
     # Default: '-s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=goreleaser'
     # Templates: allowed
-    # ldflags:
-    #   - '-s -w -X "github.com/ashish10alex/dj/internal/version.buildDate={{ .Env.BUILD_DATE }}" -X "github.com/ashish10alex/dj/internal/version.gitCommit={{ .Env.GIT_COMMIT }}" -X "github.com/ashish10alex/dj/internal/version.gitVersion={{ .Env.VERSION }}" '
+    ldflags:
+      - '-s -w -X "github.com/ashish10alex/formatdataform/internal/version.buildDate={{ .Env.BUILD_DATE }}" -X "github.com/ashish10alex/formatdataform/internal/version.gitCommit={{ .Env.GIT_COMMIT }}" -X "github.com/ashish10alex/formatdataform/internal/version.gitVersion={{ .Env.VERSION }}" '
 
 # .goreleaser.yml
 changelog:

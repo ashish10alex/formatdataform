@@ -22,24 +22,40 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"fmt"
 	"os"
 
+	"github.com/ashish10alex/formatdataform/internal/version"
 	"github.com/spf13/cobra"
 )
 
+var getVersionInfo bool
 var sqlfluffConfigPath string
-
-
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "formatdataform",
 	Short: "Format .sqlx files",
-	Long: ``,
+	Long:  ``,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
-    //TODO: might add version information here
-	// Run: func(cmd *cobra.Command, args []string) { },
+	//TODO: might add version information here
+	Run: func(cmd *cobra.Command, args []string) {
+
+		if getVersionInfo {
+			versionInfo := version.Get()
+			fmt.Println("formatdataform is a command line too to format .sqlx files in Dataform project")
+			fmt.Println("")
+			fmt.Println("Git Version: ", versionInfo.GitVersion)
+			fmt.Println("Git Commit:  ", versionInfo.GitCommit)
+			fmt.Println("Build Date:  ", versionInfo.BuildDate)
+			fmt.Println("Go Version:  ", versionInfo.GoVersion)
+			fmt.Println("Platform:    ", versionInfo.Platform)
+		} else {
+			cmd.Help()
+		}
+
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -58,10 +74,9 @@ func init() {
 
 	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.formatdataform.yaml)")
 
+	rootCmd.Flags().BoolVarP(&getVersionInfo, "version", "v", false, "Returns the version of the binary")
 	rootCmd.PersistentFlags().StringP("sqlfluff_config_path", "c", "", "Path to the sqlfluff config file")
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
-
-

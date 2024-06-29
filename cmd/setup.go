@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/fatih/color"
@@ -15,48 +16,30 @@ import (
 var setupCmd = &cobra.Command{
 	Use:   "setup",
 	Short: "Creates a supporting files need for formatting",
-	Long: ``,
+	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 
-        yellow := color.New(color.FgYellow).SprintFunc()
+		yellow := color.New(color.FgYellow).SprintFunc()
 
-		// create a directory .formatdataform
-        fmt.Println("Creating", yellow(".formatdataform "), "directory at the root of your project")
+		fmt.Println("Creating `.formatdataform` directory at the root of your project")
 		os.Mkdir(".formatdataform", 0755)
-		//add the following lines of python code to the file .formatdataform/sqlfluff_formatter.py
-		// add the following lines of python code to the file .formatdataform/sqlfluff_formatter.py
-		f, err := os.Create(".formatdataform/sqlfluff_formatter.py")
 
-        code := `
-import sys
-sqlfluff_config_path = sys.argv[1]
-my_bad_query = sys.argv[2]
-
-def fix_query(sqlfluff_config_path, my_bad_query):
-    try:
-        import sqlfluff
-    except ImportError:
-        return "sqlfluff is not installed"
-    my_good_query = sqlfluff.fix(
-                        my_bad_query,
-                        dialect="bigquery",
-                        config_path=str(sqlfluff_config_path),
-                        )
-    return my_good_query
-
-print(fix_query(sqlfluff_config_path, my_bad_query)) # so that GoLang can read stdout
-        `
-
+        err := createFileFromText(pythonCode, ".formatdataform/sqlfluff_formatter.py")
 		if err != nil {
-			fmt.Println(err)
+            log.Println("Setup failed!!!")
+			log.Fatalf(err.Error())
 			return
-		} else {
-			f.WriteString(code)
-            fmt.Println("sqlfluff_formatter.py file created at:", yellow(".formatdataform/sqlfluff_formatter.py"))
-			f.Close()
-            fmt.Println("Setup complete")
-            fmt.Println("Now you can run: ", yellow("formatdataform format <path>"))
 		}
+
+		err = createFileFromText(sqlfluffConfig, ".formatdataform/.sqlfluff")
+		if err != nil {
+            log.Println("Setup failed!!!")
+			log.Fatalf(err.Error())
+			return
+		}
+
+		fmt.Println("Setup complete")
+		fmt.Println("Now you can run: ", yellow("`formatdataform format <path>`"))
 	},
 }
 

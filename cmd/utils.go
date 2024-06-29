@@ -19,13 +19,13 @@ import (
 var ErrorFormattingSqlxFile = errors.New("Error formatting sqlx file")
 
 func fileExists(filename string) bool {
-    _, err := os.Stat(filename)
-    if err != nil {
-        if os.IsNotExist(err) {
-            return false
-        }
-    }
-    return true
+	_, err := os.Stat(filename)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false
+		}
+	}
+	return true
 }
 
 // Walks the dataformRootDirectory and recursively finds sqlx files
@@ -48,7 +48,6 @@ func findSqlxFiles(dataformRootDirectory string) *[]string {
 	return nil
 }
 
-
 func formatSqlCode(sqlxFileMetaData *sqlxFileMetaData, pythonScriptPath string, sqlfluffConfigPath string, logger *slog.Logger) error {
 	queryString := *&sqlxFileMetaData.queryString
 
@@ -59,25 +58,25 @@ func formatSqlCode(sqlxFileMetaData *sqlxFileMetaData, pythonScriptPath string, 
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
-    err := cmd.Run()
+	err := cmd.Run()
 	if err != nil {
-        logger.Error(stderr.String(), slog.String("file", sqlxFileMetaData.filepath))
-        sqlxFileMetaData.formattedQuery = string(queryString) // If there is an error, return the original query
-        return ErrorFormattingSqlxFile
+		logger.Error(stderr.String(), slog.String("file", sqlxFileMetaData.filepath))
+		sqlxFileMetaData.formattedQuery = string(queryString) // If there is an error, return the original query
+		return ErrorFormattingSqlxFile
 	}
 	output := stdout.String()
-    sql_fluff_not_installed := (strings.TrimSpace(output) == "sqlfluff is not installed")
-    if sql_fluff_not_installed {
-        log.Fatal(color.RedString("sqlfluff not installed. Please install sqlfluff using 'pip install sqlfluff'"))
-    }
+	sql_fluff_not_installed := (strings.TrimSpace(output) == "sqlfluff is not installed")
+	if sql_fluff_not_installed {
+		log.Fatal(color.RedString("sqlfluff not installed. Please install sqlfluff using 'pip install sqlfluff'"))
+	}
 	sqlxFileMetaData.formattedQuery = output
-    return nil
+	return nil
 }
 
 func writeContentsToFile(sqlxFileMetaData *sqlxFileMetaData, formattingError error) {
 
-    yellow := color.New(color.FgYellow).SprintFunc()
-    red := color.New(color.FgRed).SprintFunc()
+	yellow := color.New(color.FgYellow).SprintFunc()
+	red := color.New(color.FgRed).SprintFunc()
 
 	baseFilepath := strings.Split(sqlxFileMetaData.filepath, "definitions/")
 	formattedFilePath := "formatted/" + "definitions/" + baseFilepath[1]
@@ -103,8 +102,8 @@ func writeContentsToFile(sqlxFileMetaData *sqlxFileMetaData, formattingError err
 
 func writeContentsToFileInPlace(sqlxFileMetaData *sqlxFileMetaData, formattingError error) {
 
-    yellow := color.New(color.FgYellow).SprintFunc()
-    red := color.New(color.FgRed).SprintFunc()
+	yellow := color.New(color.FgYellow).SprintFunc()
+	red := color.New(color.FgRed).SprintFunc()
 
 	completeQuery := sqlxFileMetaData.configString + "\n\n" + sqlxFileMetaData.formattedQuery
 	err := os.WriteFile(sqlxFileMetaData.filepath, []byte(completeQuery), 0664)
@@ -127,7 +126,7 @@ func formatSqlxFile(sqlxFilePath string, inplace bool, sqlfluffConfigPath string
 	if err != nil {
 		fmt.Println("Error finding config blocks:", err)
 	} else {
-        pythonScriptPath := ".formatdataform/sqlfluff_formatter.py"
+		pythonScriptPath := ".formatdataform/sqlfluff_formatter.py"
 		formattingError := formatSqlCode(&sqlxFileMetaData, pythonScriptPath, sqlfluffConfigPath, logger)
 		if inplace {
 			writeContentsToFileInPlace(&sqlxFileMetaData, formattingError)
@@ -147,7 +146,6 @@ func getIoReader(filepath string) (io.Reader, error) {
 	}
 	return file, nil
 }
-
 
 // Gives number of lines by reading the file in chunks, supposed to be faster than lineCounterV1 (https://stackoverflow.com/questions/24562942/golang-how-do-i-determine-the-number-of-lines-in-a-file-efficiently)
 func lineCounterV2(filepath string) (int, error) {
@@ -176,3 +174,16 @@ func lineCounterV2(filepath string) (int, error) {
 	}
 }
 
+func createFileFromText(text string, filepath string) error {
+
+	f, err := os.Create(filepath)
+
+	if err != nil {
+		return err
+	} else {
+		f.WriteString(text)
+		fmt.Printf("file created at: `%s` \n",  filepath)
+		f.Close()
+	}
+	return nil
+}

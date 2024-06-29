@@ -4,18 +4,31 @@
 
 Format `.sqlx` files in your Dataform project
 
-**Setup necessary files to support formatting** ( needs to be done just once for a Dataform project )
+Setup necessary files & default .sqluff config file to support formatting *( needs to be done just once for a Dataform project )*
 
 ```bash
 formatdataform setup
 ```
 
 
+Install [sqlfluff](https://github.com/sqlfluff/sqlfluff)
+
+```
+pip install sqlfluff
+```
+
 **Format a file or directory**
+
+```bash
+formatdataform format <path_to_file_or_directory>
+```
+
+To override the default config file
 
 ```bash
 formatdataform -c <path_to_sqlfluff_config_file> format <path_to_file_or_directory>
 ```
+
 
 ### [Installation](#installation)
 

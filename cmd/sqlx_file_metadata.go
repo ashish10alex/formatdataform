@@ -28,7 +28,7 @@ func getSqlxFileMetaData(filepath string) (sqlxFileMetaData, error) {
 		return sqlxFileMetaData{}, err
 	}
 
-	numLines, err := lineCounterV2(filepath)
+	numLines, err := countLinesInFile(filepath)
 
 	if err != nil {
 		fmt.Println("Error opening file:", err)

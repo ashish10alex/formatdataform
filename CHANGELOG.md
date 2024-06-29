@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.2](https://github.com/ashish10alex/formatdataform/compare/v0.0.1...v0.0.2) (2024-06-29)
+
+
+### Features
+
+* add version information to cli when releasing ([c013b8e](https://github.com/ashish10alex/formatdataform/commit/c013b8ed07db20688bc87aaab742e5a786646452))
+
 ### [0.0.1](https://github.com/ashish10alex/formatdataform/compare/v0.0.1-pre...v0.0.1) (2024-06-29)
 
 

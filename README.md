@@ -29,7 +29,7 @@ the regex for `[sqlfluff:templater:placeholder]` to handle the parsing of `${ref
 
 ### Installation
 
-**Prerequisite: ** Install [sqlfluff](https://github.com/sqlfluff/sqlfluff)
+**Prerequisite:** Install [sqlfluff](https://github.com/sqlfluff/sqlfluff)
 
 ```
 pip install sqlfluff
@@ -56,5 +56,4 @@ Manually clone the repository and build the cli and add the cli to your system p
 git clone https://github.com/ashish10alex/formatdataform.git
 go build -o formatdataform
 mv formatdataform /usr/local/bin/formatdataform
-
 ```

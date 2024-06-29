@@ -4,7 +4,8 @@
 
 Format `.sqlx` files in your Dataform project
 
-Setup necessary files & default .sqluff config file to support formatting *( needs to be done just once for a Dataform project )*
+Setup necessary files & default `.sqluff` config file in `.formatdataform` directory to support formatting *( needs to be done just once for a Dataform project )*
+Setup if automatically called if user tries to format files without calling it explicitly
 
 ```bash
 formatdataform setup

@@ -50,7 +50,7 @@ var formatCmd = &cobra.Command{
 
 		fileOrDirPath := args[0]
 
-		fmt.Println("Sqlfluff config path: ", green(sqlfluffConfigPath))
+        fmt.Println("User args:\n\nSqlfluff config path: ", green(sqlfluffConfigPath))
 		fmt.Println("Inplace: ", green(inplace))
 		fmt.Print("\n")
 
@@ -71,13 +71,13 @@ var formatCmd = &cobra.Command{
 
 		if sqlfluffConfigPath == "" {
 			sqlfluffConfigPath = ".formatdataform/.sqlfluff"
-            fmt.Println("No sqlfluff config passed using default ", sqlfluffConfigPath)
+            fmt.Println("No sqlfluff config passed trying to using default ", sqlfluffConfigPath)
 		}
 
 		if fileExists(sqlfluffConfigPath) == false {
-			fmt.Printf(red("sqlfluff config file does not exist at: %v \n"), sqlfluffConfigPath)
-			fmt.Println("Run ", green("`formatdataform setup` "), "to create a default config")
-			return
+			fmt.Printf(yellow("Sqlfluff config file does not exist at: %v \n"), sqlfluffConfigPath)
+			fmt.Println("Running ", green("`formatdataform setup` "), "to create a default config and supporting files")
+            Setup()
 		}
 
 		if fileExists(".formatdataform/sqlfluff_formatter.py") == false {
@@ -93,7 +93,7 @@ var formatCmd = &cobra.Command{
 		}
 
 		if fileInfo.IsDir() {
-			fmt.Println("Directory to format: ", green(fileOrDirPath))
+			fmt.Println("\nDirectory to format: ", green(fileOrDirPath))
 			var sqlxFiles = findSqlxFiles(fileOrDirPath) // TODO: specify directory and depth to search for sql files here ?
 			fmt.Println("Number of sqlx files found: ", green(len(*sqlxFiles))+"\n")
 
@@ -113,7 +113,7 @@ var formatCmd = &cobra.Command{
 			wg.Wait()
 
 		} else if !fileInfo.IsDir() {
-			fmt.Println("File to format: ", green(fileOrDirPath))
+			fmt.Println("\nFile to format: ", green(fileOrDirPath))
 			if filepath.Ext(fileOrDirPath) != ".sqlx" {
 				fmt.Printf(red("Only .sqlx files are supported for formatting \n"))
 				return

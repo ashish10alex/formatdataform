@@ -11,7 +11,7 @@ formatdataform format <path_to_file_or_directory>
 ```
 
 > [!NOTE]
-When ran for the first time on a dataform workspace. The formatdataform cli will setup necessary files & default `.sqluff` config file in `.formatdataform` directory
+When ran for the first time on a dataform workspace, the formatdataform cli will setup necessary files & default `.sqluff` config file in `.formatdataform` directory
 to support formatting. You can alternatively manually setup the defaults by running `formatdataform setup`.
 
 You can override the default sqlfluff config file by using the `--config` flag or `-c` (shorthand) as follows

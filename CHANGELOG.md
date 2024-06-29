@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.3](https://github.com/ashish10alex/formatdataform/compare/v0.0.2...v0.0.3) (2024-06-29)
+
+
+### Features
+
+* call the setup function by default if user tries to format without defualt configs ([9afcf91](https://github.com/ashish10alex/formatdataform/commit/9afcf9101094e35f40862722fb0bef2b2b0112ce))
+
 ### [0.0.2](https://github.com/ashish10alex/formatdataform/compare/v0.0.1...v0.0.2) (2024-06-29)
 
 

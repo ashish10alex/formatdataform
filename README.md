@@ -10,13 +10,6 @@ Setup necessary files & default .sqluff config file to support formatting *( nee
 formatdataform setup
 ```
 
-
-Install [sqlfluff](https://github.com/sqlfluff/sqlfluff)
-
-```
-pip install sqlfluff
-```
-
 **Format a file or directory**
 
 ```bash
@@ -31,6 +24,12 @@ formatdataform -c <path_to_sqlfluff_config_file> format <path_to_file_or_directo
 
 
 ### [Installation](#installation)
+
+Install [sqlfluff](https://github.com/sqlfluff/sqlfluff)
+
+```
+pip install sqlfluff
+```
 
 **Latest release**
 

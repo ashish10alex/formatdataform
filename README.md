@@ -29,13 +29,13 @@ the regex for `[sqlfluff:templater:placeholder]` to handle the parsing of `${ref
 
 ### Installation
 
-**Prerequisite:** Install [sqlfluff](https://github.com/sqlfluff/sqlfluff)
+1. **Prerequisite:** Install [sqlfluff](https://github.com/sqlfluff/sqlfluff)
 
 ```
 pip install sqlfluff
 ```
 
-**Install the Latest release of `formatdataform` binary**
+2. **Install the Latest release of `formatdataform` binary**
 
 ```
 curl -sSfL https://raw.githubusercontent.com/ashish10alex/formatdataform/main/install_latest.sh | bash

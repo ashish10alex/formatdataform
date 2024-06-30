@@ -2,6 +2,10 @@
 
 # Dataform formatter
 
+![version](https://img.shields.io/badge/version-0.0.3-blue)
+![Linux](https://img.shields.io/badge/Linux-supported-success)
+![macOS](https://img.shields.io/badge/macOS-supported-success)
+
 Format `.sqlx` files in your Dataform project
 
 **Format a file or directory**

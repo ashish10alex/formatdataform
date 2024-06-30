@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"log/slog"
 	"os"
 
 	"github.com/fatih/color"
@@ -29,6 +30,18 @@ func Setup() {
 		log.Fatalf(err.Error())
 		return
 	}
+}
+
+func setupLogger() (*slog.Logger, *os.File) {
+
+	os.Mkdir(".formatdataform", 0755)
+	logFile, err := os.OpenFile(".formatdataform/formatdataform_logs.json", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+
+	logger := slog.New(slog.NewJSONHandler(logFile, nil))
+	return logger, logFile
 }
 
 // setupCmd represents the setup command

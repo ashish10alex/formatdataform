@@ -5,9 +5,7 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"log/slog"
-	"os"
 	"path/filepath"
 	"sync"
 
@@ -32,65 +30,40 @@ var formatCmd = &cobra.Command{
 		inplace, _ := cmd.Flags().GetBool("inplace")
 		sqlfluffConfigPath := cmd.Flag("sqlfluff_config_path").Value.String()
 
-		// If not file or directory path is supplied
-		if len(args) == 0 {
-			log.Fatalf(yellow(`No file or directory path supplied to command:  `, red(` formatdataform format <path>
-                                                                                           ^^^^^`)))
-			return
-		}
-
-		// If more than one file or directory path is supplied
-		// TODO: Add support for multiple files or directories
-		if len(args) > 1 {
-			color.Set(color.FgYellow)
-			fmt.Printf("Only supports one file or directory path at a time, you passed %v \n", len(args))
-			color.Unset()
-			return
-		}
-
-		fileOrDirPath := args[0]
-
-        fmt.Println("User args:\n\nSqlfluff config path: ", green(sqlfluffConfigPath))
+		fmt.Println("User args:\n\nSqlfluff config path: ", green(sqlfluffConfigPath))
 		fmt.Println("Inplace: ", green(inplace))
 		fmt.Print("\n")
 
-		// make sure the .formatdataform directory exists if not create it
-		os.Mkdir(".formatdataform", 0755)
-		logFile, err := os.OpenFile(".formatdataform/formatdataform_logs.json", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-		if err != nil {
-			log.Fatalf("error opening file: %v", err)
-		}
-		defer logFile.Close()
+        logger, logFile := setupLogger()
+        defer logFile.Close()
 
-		logger := slog.New(slog.NewJSONHandler(logFile, nil))
-
-		logger.Info("Formatting config",
+		logger.Info("Formatting config passed by user",
 			slog.String("sqlfluffConfigPath", sqlfluffConfigPath),
 			slog.Bool("inplace", inplace),
 		)
 
-		if sqlfluffConfigPath == "" {
-			sqlfluffConfigPath = ".formatdataform/.sqlfluff"
-            fmt.Println("No sqlfluff config passed trying to using default ", sqlfluffConfigPath)
-		}
-
-		if fileExists(sqlfluffConfigPath) == false {
-			fmt.Printf(yellow("Sqlfluff config file does not exist at: %v \n"), sqlfluffConfigPath)
-			fmt.Println("Running ", green("`formatdataform setup` "), "to create a default config and supporting files")
-            Setup()
-		}
-
-		if fileExists(".formatdataform/sqlfluff_formatter.py") == false {
-			fmt.Print(yellow("sqlfluff_formatter.py file does not exist at: ", ".formatdataform/sqlfluff_formatter.py. Run: "))
-			fmt.Printf("formatdataform setup \n")
+		if !inputArgsValid(args) {
 			return
 		}
 
-		fileInfo, err := os.Stat(fileOrDirPath)
-		if err != nil {
-			log.Fatalf("Error opening file: %v", err)
+		fileOrDirPath := args[0]
+		valid, fileInfo := validFileOrDirPath(fileOrDirPath)
+		if valid == false {
 			return
 		}
+
+		setupValid, sqlfluffConfigPath := setupFilesAvailable(sqlfluffConfigPath)
+		if setupValid == false {
+			return
+		}
+
+		logger.Info("Formatting config post input validation",
+			slog.String("sqlfluffConfigPath", sqlfluffConfigPath),
+			slog.Bool("inplace", inplace),
+            slog.Bool("isDir", fileInfo.IsDir()),
+            slog.Bool("isFile", !fileInfo.IsDir()),
+		)
+
 
 		if fileInfo.IsDir() {
 			fmt.Println("\nDirectory to format: ", green(fileOrDirPath))

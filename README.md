@@ -2,7 +2,7 @@
 
 # Dataform formatter
 
-![version](https://img.shields.io/badge/version-0.0.3-blue)
+[![Version](https://img.shields.io/github/v/release/ashish10alex/formatdataform)](https://github.com/ashish10alex/formatdataform/releases)
 ![Linux](https://img.shields.io/badge/Linux-supported-success)
 ![macOS](https://img.shields.io/badge/macOS-supported-success)
 

@@ -69,6 +69,9 @@ var formatCmd = &cobra.Command{
 			fmt.Println("\nDirectory to format: ", green(fileOrDirPath))
 			var sqlxFiles = findSqlxFiles(fileOrDirPath) // TODO: specify directory and depth to search for sql files here ?
 			fmt.Println("Number of sqlx files found: ", green(len(*sqlxFiles))+"\n")
+            logger.Info("Num sqlx files found",
+                slog.Int("len(*sqlxFiles)", len(*sqlxFiles)),
+            )
 
 			if len(*sqlxFiles) == 0 {
 				fmt.Println("No .sqlx files found in the directory: ", yellow(fileOrDirPath))

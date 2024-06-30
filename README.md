@@ -6,7 +6,7 @@
 ![Linux](https://img.shields.io/badge/Linux-supported-success)
 ![macOS](https://img.shields.io/badge/macOS-supported-success)
 
-Format `.sqlx` files in your Dataform project
+Format `.sqlx` files in your Dataform project using [sqlfluff](https://github.com/sqlfluff/sqlfluff)
 
 **Format a file or directory**
 

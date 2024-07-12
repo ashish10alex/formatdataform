@@ -24,7 +24,7 @@ allow_scalar = False
 [sqlfluff:indentation]
 # See https://docs.sqlfluff.com/en/stable/layout.html#configuring-indent-locations
 indent_unit = space
-tab_space_size = 4
+tab_space_size = 2
 indented_joins = False
 indented_ctes = False
 indented_using_on = True

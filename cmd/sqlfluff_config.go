@@ -22,13 +22,27 @@ exclude_rules = AL07, ST06, ST07, AM03, ST04, LT05, AL05
 allow_scalar = False
 
 [sqlfluff:indentation]
-tab_space_size = 2
+# See https://docs.sqlfluff.com/en/stable/layout.html#configuring-indent-locations
+indent_unit = space
+tab_space_size = 4
 indented_joins = False
+indented_ctes = False
 indented_using_on = True
-indented_then = False
-indented_on_contents = False
-allow_implicit_indents = True
+indented_on_contents = True
+indented_then = True
+indented_then_contents = True
+allow_implicit_indents = False
 template_blocks_indent = True
+# This is a comma separated list of elements to skip
+# indentation edits to.
+skip_indentation_in = script_content
+# If comments are found at the end of long lines, we default to moving
+# them to the line _before_ their current location as the convention is
+# that a comment precedes the line it describes. However if you prefer
+# comments moved _after_, this configuration setting can be set to "after".
+trailing_comments = before
+# To exclude comment lines from indentation entirely set this to "True".
+ignore_comment_lines = False
 
 [sqlfluff:layout:type:where_clause]
 line_position = alone:strict

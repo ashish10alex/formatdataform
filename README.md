@@ -2,13 +2,14 @@
 
 # Dataform formatter
 
+Format `.sqlx` files in your Dataform project using [sqlfluff](https://github.com/sqlfluff/sqlfluff)
+
 [![Version](https://img.shields.io/github/v/release/ashish10alex/formatdataform)](https://github.com/ashish10alex/formatdataform/releases)
 ![Linux](https://img.shields.io/badge/Linux-supported-success)
 ![macOS](https://img.shields.io/badge/macOS-supported-success)
 
-Format `.sqlx` files in your Dataform project using [sqlfluff](https://github.com/sqlfluff/sqlfluff)
 
-**Format a file or directory**
+**To format a file or directory run**
 
 ```bash
 formatdataform format <path_to_file_or_directory>

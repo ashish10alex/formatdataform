@@ -14,6 +14,9 @@ type sqlxFileMetaData struct {
 	configStartLine int
 	configEndLine   int
 	configString    string
+    preOperationsStartLine int
+    preOperationsEndLine int
+    preOperationsString string
 	queryString     string
 	formattedQuery  string
 }
@@ -35,6 +38,9 @@ func getSqlxFileMetaData(filepath string) (sqlxFileMetaData, error) {
 	// variables to keep track of where we are in the file
 	var configStartLine = 0
 	var configEndLine = 0
+	var preOperationsStartLine = 0
+	var preOperationsEndLine = 0
+    var preOperationsString = ""
 	var currentLineNumber = 0
 	var configString = ""
 	var queryString = ""
@@ -45,6 +51,9 @@ func getSqlxFileMetaData(filepath string) (sqlxFileMetaData, error) {
 	var isInInnerConfigBlock = false
 	var openCurlyBraceCount = 0
 	var closeCurlyBraceCount = 0
+	var preOperationsBlockStarted = false
+	var isInInnerPreOperationsBlock = false
+    var isInPreOperationsBlock = false
 	var queryBlockStarted = false
 
 	scanner := bufio.NewScanner(file)
@@ -94,12 +103,44 @@ func getSqlxFileMetaData(filepath string) (sqlxFileMetaData, error) {
 		}
 
 		if isConfigBlockEnd == true && currentLineNumber != configEndLine { // query block started but looking for first non empty string
+			if strings.Contains(line, "pre_operations") {
+                isInPreOperationsBlock = true
+				preOperationsBlockStarted = true
+				openCurlyBraceCount = 0
+				closeCurlyBraceCount = 0
+				preOperationsStartLine = currentLineNumber
+			}
+		}
+
+		if preOperationsBlockStarted == true && currentLineNumber != configEndLine {
+            preOperationsString += line + "\n"
+			if strings.Contains(line, "{") {
+				openCurlyBraceCount++
+				if (openCurlyBraceCount != closeCurlyBraceCount) && (openCurlyBraceCount > 1) {
+					isInInnerPreOperationsBlock = true
+				}
+			}
+
+			if strings.Contains(line, "}") {
+				closeCurlyBraceCount++
+				if isInInnerPreOperationsBlock == true {
+					if closeCurlyBraceCount == openCurlyBraceCount {
+                        isInPreOperationsBlock = false
+						isInInnerPreOperationsBlock = false
+						preOperationsEndLine = currentLineNumber
+						preOperationsBlockStarted = false
+					}
+				}
+			}
+		}
+
+		if isConfigBlockEnd == true && preOperationsBlockStarted == false && currentLineNumber != preOperationsEndLine && currentLineNumber != configEndLine {
 			if line != "" {
 				queryBlockStarted = true
 			}
 		}
 
-		if queryBlockStarted { // in the query block
+		if queryBlockStarted && isInPreOperationsBlock == false && currentLineNumber != preOperationsEndLine { // in the query block
 			if currentLineNumber == numLines {
 				queryString += line
 			} else {
@@ -115,6 +156,9 @@ func getSqlxFileMetaData(filepath string) (sqlxFileMetaData, error) {
 		configStartLine: configStartLine,
 		configEndLine:   configEndLine,
 		configString:    configString,
+        preOperationsStartLine: preOperationsStartLine,
+        preOperationsEndLine: preOperationsEndLine,
+        preOperationsString: preOperationsString,
 		queryString:     queryString,
 	}, nil
 }

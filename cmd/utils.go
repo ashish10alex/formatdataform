@@ -85,7 +85,13 @@ func writeContentsToFile(sqlxFileMetaData *sqlxFileMetaData, formattingError err
 
 	os.MkdirAll(dirToCreate, 0755) // TODO: make this configurable
 
-	completeQuery := sqlxFileMetaData.configString + "\n\n" + sqlxFileMetaData.preOperationsString + "\n\n" + sqlxFileMetaData.formattedQuery
+    completeQuery := ""
+    if sqlxFileMetaData.preOperationsString == "" {
+        completeQuery = sqlxFileMetaData.configString + "\n\n" + sqlxFileMetaData.formattedQuery
+    } else {
+        completeQuery = sqlxFileMetaData.configString + "\n\n" + sqlxFileMetaData.preOperationsString + "\n\n" + sqlxFileMetaData.formattedQuery
+    }
+
 	err := os.WriteFile(formattedFilePath, []byte(completeQuery), 0664)
 	if err != nil {
 		fmt.Println("Error writing to file:", err)
@@ -105,7 +111,12 @@ func writeContentsToFileInPlace(sqlxFileMetaData *sqlxFileMetaData, formattingEr
 	yellow := color.New(color.FgYellow).SprintFunc()
 	red := color.New(color.FgRed).SprintFunc()
 
-	completeQuery := sqlxFileMetaData.configString + "\n\n" + sqlxFileMetaData.preOperationsString + "\n\n" + sqlxFileMetaData.formattedQuery
+    completeQuery := ""
+    if sqlxFileMetaData.preOperationsString == "" {
+        completeQuery = sqlxFileMetaData.configString + "\n\n" + sqlxFileMetaData.formattedQuery
+    } else {
+        completeQuery = sqlxFileMetaData.configString + "\n\n" + sqlxFileMetaData.preOperationsString + "\n\n" + sqlxFileMetaData.formattedQuery
+    }
 	err := os.WriteFile(sqlxFileMetaData.filepath, []byte(completeQuery), 0664)
 	if err != nil {
 		fmt.Println("Error writing to file:", err)

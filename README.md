@@ -62,3 +62,8 @@ git clone https://github.com/ashish10alex/formatdataform.git
 go build -o formatdataform
 mv formatdataform /usr/local/bin/formatdataform
 ```
+
+### To run tests
+
+1. Install [gotestsum](https://github.com/gotestyourself/gotestsum?tab=readme-ov-file#output-format) for prettier test visualization
+2. Run `gotestsum --format testname`

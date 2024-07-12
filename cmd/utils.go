@@ -148,30 +148,31 @@ func getIoReader(filepath string) (io.Reader, error) {
 }
 
 // Gives number of lines by reading the file in chunks, supposed to be faster than lineCounterV1 (https://stackoverflow.com/questions/24562942/golang-how-do-i-determine-the-number-of-lines-in-a-file-efficiently)
-func lineCounterV2(filepath string) (int, error) {
-	file, err := getIoReader(filepath)
 
-	if err != nil {
-		fmt.Println("Error opening file:", err)
-		return 0, err
-	}
-
+func lineCounterV3(reader io.Reader) (int, error) {
 	buf := make([]byte, 32*1024)
 	count := 0
 	lineSep := []byte{'\n'}
 
 	for {
-		c, err := file.Read(buf)
+		c, err := reader.Read(buf)
 		count += bytes.Count(buf[:c], lineSep)
 
 		switch {
 		case err == io.EOF:
 			return count, nil
-
 		case err != nil:
 			return count, err
 		}
 	}
+}
+
+func countLinesInFile(filepath string) (int, error) {
+	reader, err := getIoReader(filepath)
+	if err != nil {
+		return 0, err
+	}
+	return lineCounterV3(reader)
 }
 
 func createFileFromText(text string, filepath string) error {

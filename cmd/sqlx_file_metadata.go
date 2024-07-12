@@ -1,4 +1,3 @@
-
 package cmd
 
 import (
@@ -19,16 +18,14 @@ type sqlxFileMetaData struct {
 	formattedQuery  string
 }
 
-
 func getSqlxFileMetaData(filepath string) (sqlxFileMetaData, error) {
 	file, err := os.Open(filepath)
 	if err != nil {
-        fmt.Println("I am here")
 		fmt.Println("Error opening file:", err)
 		return sqlxFileMetaData{}, err
 	}
 
-	numLines, err := lineCounterV2(filepath)
+	numLines, err := countLinesInFile(filepath)
 
 	if err != nil {
 		fmt.Println("Error opening file:", err)
@@ -38,7 +35,7 @@ func getSqlxFileMetaData(filepath string) (sqlxFileMetaData, error) {
 	// variables to keep track of where we are in the file
 	var configStartLine = 0
 	var configEndLine = 0
-	var currentLine = 0
+	var currentLineNumber = 0
 	var configString = ""
 	var queryString = ""
 
@@ -52,10 +49,10 @@ func getSqlxFileMetaData(filepath string) (sqlxFileMetaData, error) {
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		currentLine++
+		currentLineNumber++
 		var line = scanner.Text()
 
-        //TODO: Check if this line is ever hit ?
+		//TODO: Check if this line is ever hit ?
 		if err == io.EOF {
 			break // End of file
 		}
@@ -68,7 +65,7 @@ func getSqlxFileMetaData(filepath string) (sqlxFileMetaData, error) {
 		// If the line contains the word "config" and if we are not already in the config block, then we start the config block
 		if strings.Contains(line, "config") && isConfigBlock == false {
 			isConfigBlock = true
-			configStartLine = currentLine
+			configStartLine = currentLineNumber
 			configString += line + "\n"
 		}
 
@@ -80,7 +77,7 @@ func getSqlxFileMetaData(filepath string) (sqlxFileMetaData, error) {
 			}
 		}
 
-		if strings.Contains(line, "}") && isConfigBlock == true { // TODO: breaks when you have } before the config block ends
+		if strings.Contains(line, "}") && isConfigBlock == true { // TODO: breaks when you have curly brace before the config block ends
 
 			if configStartLine == 0 {
 				configEndLine = 0
@@ -88,22 +85,22 @@ func getSqlxFileMetaData(filepath string) (sqlxFileMetaData, error) {
 				fmt.Errorf("No config block found in file: %s", filepath)
 			} else if isInInnerConfigBlock == true {
 				closeCurlyBraceCount++
-				isInInnerConfigBlock = false
+				isInInnerConfigBlock = false // NOTE: does this mean that we only go to 1 nesting level ?
 			} else {
-				configEndLine = currentLine
+				configEndLine = currentLineNumber
 				isConfigBlockEnd = true
 				isConfigBlock = false
 			}
 		}
 
-		if isConfigBlockEnd == true && currentLine != configEndLine { // we are in the query block
+		if isConfigBlockEnd == true && currentLineNumber != configEndLine { // query block started but looking for first non empty string
 			if line != "" {
 				queryBlockStarted = true
 			}
 		}
 
-		if isConfigBlockEnd == true && currentLine != configEndLine && queryBlockStarted { // we are in the query block
-			if currentLine == numLines {
+		if queryBlockStarted { // in the query block
+			if currentLineNumber == numLines {
 				queryString += line
 			} else {
 				queryString += line + "\n"

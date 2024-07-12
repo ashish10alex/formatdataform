@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.5](https://github.com/ashish10alex/formatdataform/compare/v0.0.4...v0.0.5) (2024-07-12)
+
+
+### Features
+
+* add support for `pre_operations` ([d954e6b](https://github.com/ashish10alex/formatdataform/commit/d954e6baca0df05aef8368565d53e5e0c624a06e))
+
 ### [0.0.4](https://github.com/ashish10alex/formatdataform/compare/v0.0.3...v0.0.4) (2024-07-12)
 
 

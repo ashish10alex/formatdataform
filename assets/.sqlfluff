@@ -125,6 +125,7 @@ quoted_identifiers_policy = none
 # 1 is used by sqlfluff to replace the regex match with the value of the placeholder
 # if you have multiple placeholders, you can add more lines with the same format
 # e.g. 2 = `gcp_project_id.my_dataset.my_table`
+# NOTE: when using formatdataform cli it automatically generates multiple lines for you (defaulted to 30 atm)
 [sqlfluff:templater:placeholder]
 param_regex = \$\{self\(\)\}|\${ref\(\"\d*([\w]+)"\)\}|\${ref\(\'\d*([\w]+)'\)\}
 1 = `gcp_project_id.my_dataset.my_table`

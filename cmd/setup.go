@@ -24,6 +24,7 @@ func Setup() {
 		return
 	}
 
+    sqlfluffConfig := createSqlfluffConfig()
 	err = createFileFromText(sqlfluffConfig, ".formatdataform/.sqlfluff")
 	if err != nil {
 		log.Println("Setup failed!!!")

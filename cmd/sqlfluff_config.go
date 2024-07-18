@@ -1,7 +1,9 @@
-
 package cmd
 
-var sqlfluffConfig = `
+import "fmt"
+
+func createSqlfluffConfig() string {
+	sqlfluffConfig := fmt.Sprintf(`
 [sqlfluff]
 templater = placeholder
 dialect = bigquery
@@ -128,6 +130,10 @@ quoted_identifiers_policy = none
 
 
 [sqlfluff:templater:placeholder]
-param_regex = \${ref\(\"\d*(?P<param_name>[\w]+)"\)\}|\${(?P<param_name>[^\s]+)}
-
-`
+param_regex = \$\{self\(\)\}|\${ref\(\"\d*([\w]+)"\)\}|\${ref\(\'\d*([\w]+)'\)\}`)
+	for j := 1; j < 30; j++ {
+		sqlfluffConfig += fmt.Sprintf(`
+%d  = %s`, j, "`gcp_project_id.dataset.table_name`")
+	}
+	return sqlfluffConfig
+}

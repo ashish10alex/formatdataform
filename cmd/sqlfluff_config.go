@@ -130,10 +130,10 @@ quoted_identifiers_policy = none
 
 
 [sqlfluff:templater:placeholder]
-param_regex = \$\{self\(\)\}|\${ref\(\"\d*([\w]+)"\)\}|\${ref\(\'\d*([\w]+)'\)\}`)
+param_regex = \$\{self\(\)\}|\${ref\(\"\d*([\w]+)"\)\}|\${ref\(\'\d*([\w]+)'\)\}|\$\{[^}]*\}`)
 	for j := 1; j < 30; j++ {
 		sqlfluffConfig += fmt.Sprintf(`
-%d  = %s`, j, "`gcp_project_id.dataset.table_name`")
+%d  = %s`, j, "my_table_or_replacement")
 	}
 	return sqlfluffConfig
 }

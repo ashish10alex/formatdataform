@@ -67,3 +67,11 @@ mv formatdataform /usr/local/bin/formatdataform
 
 1. Install [gotestsum](https://github.com/gotestyourself/gotestsum?tab=readme-ov-file#output-format) for prettier test visualization
 2. Run `gotestsum --format testname`
+
+
+### Known issues
+
+1. sqlfluff expect the table name to have backticks i.e `` `gcp_project_id.dataset.table` `` instead of `gcp_project_id.dataset.table`
+2. Does not format sql in `pre_operations` block. To handle this we would need to identify if there is a javascript block inside
+   the pre_operations block and then get the query out of that block and format it
+3. Does not format config block

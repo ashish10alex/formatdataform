@@ -78,10 +78,12 @@ func writeContentsToFile(sqlxFileMetaData *sqlxFileMetaData, formattingError err
 	yellow := color.New(color.FgYellow).SprintFunc()
 	red := color.New(color.FgRed).SprintFunc()
 
-	baseFilepath := strings.Split(sqlxFileMetaData.filepath, "definitions/")
+    filPathSeparator := string(os.PathSeparator)
+    _definitions := "definitions" + filPathSeparator
+	baseFilepath := strings.Split(sqlxFileMetaData.filepath, _definitions)
     formattedFilePath := filepath.Join("formatted", "definitions", baseFilepath[1])
 
-	dirToCreate := formattedFilePath[:strings.LastIndex(formattedFilePath, "/")]
+	dirToCreate := formattedFilePath[:strings.LastIndex(formattedFilePath, filPathSeparator)]
 
 	os.MkdirAll(dirToCreate, 0755) // TODO: make this configurable
 

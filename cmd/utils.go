@@ -30,10 +30,10 @@ func fileExists(filename string) bool {
 
 // Walks the dataformRootDirectory and recursively finds sqlx files
 func findSqlxFiles(dataformRootDirectory string) *[]string {
-	var sqlFilePath = filepath.Join(dataformRootDirectory)
+	var sqlxFilePath = filepath.Join(dataformRootDirectory)
 
 	var sqlxFiles []string
-	err := filepath.WalkDir(sqlFilePath, func(path string, di fs.DirEntry, err error) error {
+	err := filepath.WalkDir(sqlxFilePath, func(path string, di fs.DirEntry, err error) error {
 		if filepath.Ext(path) == ".sqlx" {
 			sqlxFiles = append(sqlxFiles, path)
 		}
@@ -51,7 +51,7 @@ func findSqlxFiles(dataformRootDirectory string) *[]string {
 func formatSqlCode(sqlxFileMetaData *sqlxFileMetaData, pythonScriptPath string, sqlfluffConfigPath string, logger *slog.Logger) error {
 	queryString := *&sqlxFileMetaData.queryString
 
-	cmd := exec.Command("python3", pythonScriptPath, string(sqlfluffConfigPath), string(queryString))
+	cmd := exec.Command("python", pythonScriptPath, string(sqlfluffConfigPath), string(queryString))
 
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer
@@ -60,7 +60,7 @@ func formatSqlCode(sqlxFileMetaData *sqlxFileMetaData, pythonScriptPath string, 
 
 	err := cmd.Run()
 	if err != nil {
-		logger.Error(stderr.String(), slog.String("file", sqlxFileMetaData.filepath))
+		logger.Error(stderr.String(), slog.String("file", sqlxFileMetaData.filepath), "error", err.Error())
 		sqlxFileMetaData.formattedQuery = string(queryString) // If there is an error, return the original query
 		return ErrorFormattingSqlxFile
 	}

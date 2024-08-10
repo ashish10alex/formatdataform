@@ -5,7 +5,7 @@ import (
 	"io/fs"
 	"log"
 	"os"
-
+	"path/filepath"
 	"github.com/fatih/color"
 )
 
@@ -50,7 +50,7 @@ func setupFilesAvailable(sqlfluffConfigPath string) (bool, string) {
 	yellow := color.New(color.FgYellow).SprintFunc()
 
 	if sqlfluffConfigPath == "" {
-		sqlfluffConfigPath = ".formatdataform/.sqlfluff"
+        sqlfluffConfigPath = filepath.Join(".formatdataform", ".sqlfluff")
 		fmt.Println("No sqlfluff config passed trying to using default ", sqlfluffConfigPath)
 	}
 
@@ -60,8 +60,9 @@ func setupFilesAvailable(sqlfluffConfigPath string) (bool, string) {
 		Setup()
 	}
 
-	if fileExists(".formatdataform/sqlfluff_formatter.py") == false {
-		fmt.Print(yellow("sqlfluff_formatter.py file does not exist at: ", ".formatdataform/sqlfluff_formatter.py. Run: "))
+    sqlfluffPythonScriptPath := filepath.Join(".formatdataform", "sqlfluff_formatter.py")
+	if fileExists(sqlfluffPythonScriptPath) == false {
+		fmt.Print(yellow("sqlfluff_formatter.py file does not exist at: ", sqlfluffPythonScriptPath))
 		fmt.Printf("formatdataform setup \n")
 		return false, sqlfluffConfigPath
 	}

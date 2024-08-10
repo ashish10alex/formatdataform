@@ -79,7 +79,7 @@ func writeContentsToFile(sqlxFileMetaData *sqlxFileMetaData, formattingError err
 	red := color.New(color.FgRed).SprintFunc()
 
 	baseFilepath := strings.Split(sqlxFileMetaData.filepath, "definitions/")
-	formattedFilePath := "formatted/" + "definitions/" + baseFilepath[1]
+    formattedFilePath := filepath.Join("formatted", "definitions", baseFilepath[1])
 
 	dirToCreate := formattedFilePath[:strings.LastIndex(formattedFilePath, "/")]
 
@@ -137,7 +137,7 @@ func formatSqlxFile(sqlxFilePath string, inplace bool, sqlfluffConfigPath string
 	if err != nil {
 		fmt.Println("Error finding config blocks:", err)
 	} else {
-		pythonScriptPath := ".formatdataform/sqlfluff_formatter.py"
+        pythonScriptPath := filepath.Join("formatdataform", "sqlfluff_formatter.py")
 		formattingError := formatSqlCode(&sqlxFileMetaData, pythonScriptPath, sqlfluffConfigPath, logger)
 		if inplace {
 			writeContentsToFileInPlace(&sqlxFileMetaData, formattingError)

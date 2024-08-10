@@ -7,6 +7,7 @@ Format `.sqlx` files in your Dataform project using [sqlfluff](https://github.co
 [![Version](https://img.shields.io/github/v/release/ashish10alex/formatdataform)](https://github.com/ashish10alex/formatdataform/releases)
 ![Linux](https://img.shields.io/badge/Linux-supported-success)
 ![macOS](https://img.shields.io/badge/macOS-supported-success)
+![Windows](https://img.shields.io/badge/windows-supported-success)
 
 
 **To format a file or directory run**
@@ -40,11 +41,14 @@ the regex for `[sqlfluff:templater:placeholder]` to handle the parsing of `${ref
 pip install sqlfluff
 ```
 
-2. **Install the Latest release of `formatdataform` binary**
+2. **Install the Latest release of `formatdataform` binary** ( WSL / Linux / MacOS users only!)
 
 ```
 curl -sSfL https://raw.githubusercontent.com/ashish10alex/formatdataform/main/install_latest.sh | bash
 ```
+
+> [!NOTE]
+If you are a windows user please download the binary [directly from the releases](https://github.com/ashish10alex/formatdataform/releases)
 
 **OR**
 

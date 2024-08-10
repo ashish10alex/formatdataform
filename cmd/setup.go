@@ -8,6 +8,7 @@ import (
 	"log"
 	"log/slog"
 	"os"
+	"path/filepath"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -25,7 +26,7 @@ func Setup() {
 	}
 
     sqlfluffConfig := createSqlfluffConfig()
-	err = createFileFromText(sqlfluffConfig, ".formatdataform/.sqlfluff")
+	err = createFileFromText(sqlfluffConfig, filepath.Join(".formatdataform", ".sqlfluff"))
 	if err != nil {
 		log.Println("Setup failed!!!")
 		log.Fatalf(err.Error())
@@ -36,7 +37,7 @@ func Setup() {
 func setupLogger() (*slog.Logger, *os.File) {
 
 	os.Mkdir(".formatdataform", 0755)
-	logFile, err := os.OpenFile(".formatdataform/formatdataform_logs.json", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	logFile, err := os.OpenFile(filepath.Join(".formatdataform", "formatdataform_logs.json" ), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
 	}

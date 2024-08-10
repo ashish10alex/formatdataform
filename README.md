@@ -2,7 +2,7 @@
 
 # Dataform formatter
 
-Format `.sqlx` files in your Dataform project using [sqlfluff](https://github.com/sqlfluff/sqlfluff)
+Format `.sqlx` files in your [Dataform](https://github.com/dataform-co/dataform) project using [sqlfluff](https://github.com/sqlfluff/sqlfluff)
 
 [![Version](https://img.shields.io/github/v/release/ashish10alex/formatdataform)](https://github.com/ashish10alex/formatdataform/releases)
 ![Linux](https://img.shields.io/badge/Linux-supported-success)

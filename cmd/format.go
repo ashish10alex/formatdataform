@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log/slog"
 	"path/filepath"
+	"runtime"
 	"sync"
 
 	"github.com/fatih/color"
@@ -64,6 +65,13 @@ var formatCmd = &cobra.Command{
             slog.Bool("isFile", !fileInfo.IsDir()),
 		)
 
+        // doing this as there seems to be a hassle using python as executable in $PATH in macos
+        pythonExecutable := "python3"
+        if runtime.GOOS == "windows" {
+            pythonExecutable = "python"
+        } else {
+            pythonExecutable = "python3"
+        }
 
 		if fileInfo.IsDir() {
 			fmt.Println("\nDirectory to format: ", green(fileOrDirPath))
@@ -83,7 +91,7 @@ var formatCmd = &cobra.Command{
 				wg.Add(1)
 				go func(i int) {
 					defer wg.Done()
-					formatSqlxFile((*sqlxFiles)[i], inplace, sqlfluffConfigPath, logger)
+					formatSqlxFile((*sqlxFiles)[i], inplace, sqlfluffConfigPath, pythonExecutable, logger)
 				}(i)
 			}
 			wg.Wait()
@@ -94,7 +102,7 @@ var formatCmd = &cobra.Command{
 				fmt.Printf(red("Only .sqlx files are supported for formatting \n"))
 				return
 			}
-			formatSqlxFile(fileOrDirPath, inplace, sqlfluffConfigPath, logger)
+			formatSqlxFile(fileOrDirPath, inplace, sqlfluffConfigPath, pythonExecutable, logger)
 		} else {
 			cmd.Help()
 		}

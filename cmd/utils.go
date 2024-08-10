@@ -48,10 +48,10 @@ func findSqlxFiles(dataformRootDirectory string) *[]string {
 	return nil
 }
 
-func formatSqlCode(sqlxFileMetaData *sqlxFileMetaData, pythonScriptPath string, sqlfluffConfigPath string, logger *slog.Logger) error {
+func formatSqlCode(sqlxFileMetaData *sqlxFileMetaData, pythonScriptPath string, sqlfluffConfigPath string, pythonExecutable string, logger *slog.Logger) error {
 	queryString := *&sqlxFileMetaData.queryString
 
-	cmd := exec.Command("python", pythonScriptPath, string(sqlfluffConfigPath), string(queryString))
+	cmd := exec.Command(pythonExecutable, pythonScriptPath, string(sqlfluffConfigPath), string(queryString))
 
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer
@@ -133,14 +133,14 @@ func writeContentsToFileInPlace(sqlxFileMetaData *sqlxFileMetaData, formattingEr
 	}
 }
 
-func formatSqlxFile(sqlxFilePath string, inplace bool, sqlfluffConfigPath string, logger *slog.Logger) {
+func formatSqlxFile(sqlxFilePath string, inplace bool, sqlfluffConfigPath string, pythonExecutable string, logger *slog.Logger) {
 	sqlxFileMetaData, err := getSqlxFileMetaData(sqlxFilePath)
 
 	if err != nil {
 		fmt.Println("Error finding config blocks:", err)
 	} else {
         pythonScriptPath := filepath.Join(".formatdataform", "sqlfluff_formatter.py")
-		formattingError := formatSqlCode(&sqlxFileMetaData, pythonScriptPath, sqlfluffConfigPath, logger)
+		formattingError := formatSqlCode(&sqlxFileMetaData, pythonScriptPath, sqlfluffConfigPath, pythonExecutable, logger)
 		if inplace {
 			writeContentsToFileInPlace(&sqlxFileMetaData, formattingError)
 		} else {

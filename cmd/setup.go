@@ -18,7 +18,7 @@ func Setup() {
 	fmt.Println("Creating `.formatdataform` directory at the root of your project")
 	os.Mkdir(".formatdataform", 0755)
 
-	err := createFileFromText(pythonCode, ".formatdataform/sqlfluff_formatter.py")
+	err := createFileFromText(pythonCode, filepath.Join(".formatdataform", "sqlfluff_formatter.py"))
 	if err != nil {
 		log.Println("Setup failed!!!")
 		log.Fatalf(err.Error())

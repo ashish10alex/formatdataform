@@ -79,3 +79,7 @@ mv formatdataform /usr/local/bin/formatdataform
 2. Does not format sql in `pre_operations` block. To handle this we would need to identify if there is a javascript block inside
    the pre_operations block and then get the query out of that block and format it
 3. Does not format config block
+
+### TODO
+
+- [ ] Refactor config, pre/post operations block to support multiple pre/post operations

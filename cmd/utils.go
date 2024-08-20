@@ -48,8 +48,8 @@ func findSqlxFiles(dataformRootDirectory string) *[]string {
 	return nil
 }
 
-func formatSqlCode(sqlxFileMetaData *sqlxFileMetaData, pythonScriptPath string, sqlfluffConfigPath string, pythonExecutable string, logger *slog.Logger) error {
-	queryString := *&sqlxFileMetaData.queryString
+func formatSqlCode(sqlxFileMetaData *sqlxParserMeta, pythonScriptPath string, sqlfluffConfigPath string, pythonExecutable string, logger *slog.Logger) error {
+	queryString := *&sqlxFileMetaData.sqlBlocksMeta.sqlBlockContent
 
 	cmd := exec.Command(pythonExecutable, pythonScriptPath, string(sqlfluffConfigPath), string(queryString))
 
@@ -61,7 +61,7 @@ func formatSqlCode(sqlxFileMetaData *sqlxFileMetaData, pythonScriptPath string, 
 	err := cmd.Run()
 	if err != nil {
 		logger.Error(stderr.String(), slog.String("file", sqlxFileMetaData.filepath), "error", err.Error())
-		sqlxFileMetaData.formattedQuery = string(queryString) // If there is an error, return the original query
+        sqlxFileMetaData.sqlBlocksMeta.formattedSqlBlockContent = string(queryString)
 		return ErrorFormattingSqlxFile
 	}
 	output := stdout.String()
@@ -69,11 +69,44 @@ func formatSqlCode(sqlxFileMetaData *sqlxFileMetaData, pythonScriptPath string, 
 	if sql_fluff_not_installed {
 		log.Fatal(color.RedString("sqlfluff not installed. Please install sqlfluff using 'pip install sqlfluff'"))
 	}
-	sqlxFileMetaData.formattedQuery = output
+    sqlxFileMetaData.sqlBlocksMeta.formattedSqlBlockContent = output
 	return nil
 }
 
-func writeContentsToFile(sqlxFileMetaData *sqlxFileMetaData, formattingError error) {
+func finalFormmatedSqlxFileContents(sqlxFileMetaData *sqlxParserMeta) string {
+    spaceBetweenBlocks := "\n\n"
+    spaceBetweenSameOps := "\n"
+
+    formattedQuery := ""
+
+    preOpsBlocks := sqlxFileMetaData.preOpsBlocksMeta
+    postOpsBlocks := sqlxFileMetaData.postOpsBlocksMeta
+
+    preOpsBlockContent := ""
+    if len(preOpsBlocks) > 0 {
+        for _, preOpsBlock := range preOpsBlocks {
+            preOpsBlockContent += preOpsBlock.preOpsBlockContent + spaceBetweenSameOps
+        }
+    }
+
+    postOpsBlockContent := ""
+    if len(postOpsBlocks) > 0 {
+        for _, postOpsBlock := range postOpsBlocks {
+            postOpsBlockContent += postOpsBlock.postOpsBlockContent + spaceBetweenSameOps
+        }
+    }
+
+    formattedQuery = sqlxFileMetaData.configBlockMeta.configBlockContent +
+                                                        spaceBetweenBlocks +
+                                                        preOpsBlockContent +
+                                                        spaceBetweenBlocks +
+                                                        postOpsBlockContent +
+                                                        spaceBetweenBlocks +
+                                                        sqlxFileMetaData.sqlBlocksMeta.formattedSqlBlockContent
+    return formattedQuery
+}
+
+func writeContentsToFile(sqlxFileMetaData *sqlxParserMeta, formattingError error) {
 
 	yellow := color.New(color.FgYellow).SprintFunc()
 	red := color.New(color.FgRed).SprintFunc()
@@ -87,14 +120,9 @@ func writeContentsToFile(sqlxFileMetaData *sqlxFileMetaData, formattingError err
 
 	os.MkdirAll(dirToCreate, 0755) // TODO: make this configurable
 
-    completeQuery := ""
-    if sqlxFileMetaData.preOperationsString == "" {
-        completeQuery = sqlxFileMetaData.configString + "\n\n" + sqlxFileMetaData.formattedQuery
-    } else {
-        completeQuery = sqlxFileMetaData.configString + "\n\n" + sqlxFileMetaData.preOperationsString + "\n\n" + sqlxFileMetaData.formattedQuery
-    }
+    formattedQuery := finalFormmatedSqlxFileContents(sqlxFileMetaData)
 
-	err := os.WriteFile(formattedFilePath, []byte(completeQuery), 0664)
+	err := os.WriteFile(formattedFilePath, []byte(formattedQuery), 0664)
 	if err != nil {
 		fmt.Println("Error writing to file:", err)
 		return
@@ -108,18 +136,14 @@ func writeContentsToFile(sqlxFileMetaData *sqlxFileMetaData, formattingError err
 	}
 }
 
-func writeContentsToFileInPlace(sqlxFileMetaData *sqlxFileMetaData, formattingError error) {
+func writeContentsToFileInPlace(sqlxFileMetaData *sqlxParserMeta, formattingError error) {
 
 	yellow := color.New(color.FgYellow).SprintFunc()
 	red := color.New(color.FgRed).SprintFunc()
 
-    completeQuery := ""
-    if sqlxFileMetaData.preOperationsString == "" {
-        completeQuery = sqlxFileMetaData.configString + "\n\n" + sqlxFileMetaData.formattedQuery
-    } else {
-        completeQuery = sqlxFileMetaData.configString + "\n\n" + sqlxFileMetaData.preOperationsString + "\n\n" + sqlxFileMetaData.formattedQuery
-    }
-	err := os.WriteFile(sqlxFileMetaData.filepath, []byte(completeQuery), 0664)
+    formattedQuery := finalFormmatedSqlxFileContents(sqlxFileMetaData)
+
+	err := os.WriteFile(sqlxFileMetaData.filepath, []byte(formattedQuery), 0664)
 	if err != nil {
 		fmt.Println("Error writing to file:", err)
 		return
@@ -134,8 +158,7 @@ func writeContentsToFileInPlace(sqlxFileMetaData *sqlxFileMetaData, formattingEr
 }
 
 func formatSqlxFile(sqlxFilePath string, inplace bool, sqlfluffConfigPath string, pythonExecutable string, logger *slog.Logger) {
-	sqlxFileMetaData, err := getSqlxFileMetaData(sqlxFilePath)
-
+    sqlxFileMetaData, err := sqlxParser(sqlxFilePath)
 	if err != nil {
 		fmt.Println("Error finding config blocks:", err)
 	} else {

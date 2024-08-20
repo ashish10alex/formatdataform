@@ -86,15 +86,24 @@ func finalFormmatedSqlxFileContents(sqlxFileMetaData *sqlxParserMeta) string {
 
 	preOpsBlockContent := ""
 	if len(preOpsBlocks) > 0 {
-		for _, preOpsBlock := range preOpsBlocks {
-			preOpsBlockContent += preOpsBlock.preOpsBlockContent + spaceBetweenSameOps
+		for idx, preOpsBlock := range preOpsBlocks {
+			if idx == len(preOpsBlocks)-1 {
+				preOpsBlockContent += preOpsBlock.preOpsBlockContent
+			} else {
+				preOpsBlockContent += preOpsBlock.preOpsBlockContent + spaceBetweenSameOps
+			}
+
 		}
 	}
 
 	postOpsBlockContent := ""
 	if len(postOpsBlocks) > 0 {
-		for _, postOpsBlock := range postOpsBlocks {
-			postOpsBlockContent += postOpsBlock.postOpsBlockContent + spaceBetweenSameOps
+		for idx, postOpsBlock := range postOpsBlocks {
+			if idx == len(postOpsBlocks)-1 {
+				postOpsBlockContent += postOpsBlock.postOpsBlockContent
+			} else {
+				postOpsBlockContent += postOpsBlock.postOpsBlockContent + spaceBetweenSameOps
+			}
 		}
 	}
 

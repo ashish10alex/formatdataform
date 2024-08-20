@@ -29,12 +29,12 @@ config {
 }
 SELECT * FROM electric_cars WHERE model = $1;`,
 			expected: sqlxParserMeta{
-				numLines:        13,
-                configBlockMeta: ConfigBlockMeta {
-                    exsists: true,
-                    startOfConfigBlock: 2,
-                    endOfConfigBlock:   12,
-                    configBlockContent: `config {
+				numLines: 13,
+				configBlockMeta: ConfigBlockMeta{
+					exsists:            true,
+					startOfConfigBlock: 2,
+					endOfConfigBlock:   12,
+					configBlockContent: `config {
     type: "table",
     schema: "electric_cars",
     dependencies: 'ALL_EV_CARS_DATA',
@@ -46,17 +46,17 @@ SELECT * FROM electric_cars WHERE model = $1;`,
     tags: ["TAG_1"]
 }
 `},
-                    	sqlBlocksMeta: SqlBlockMeta {
-                        exsists: true,
-                        startOfSqlBlock: 13,
-                        endOfSqlBlock: 13,
-				sqlBlockContent: `SELECT * FROM electric_cars WHERE model = $1;`,
-                        formattedSqlBlockContent: "",
-                    },
+				sqlBlocksMeta: SqlBlockMeta{
+					exsists:                  true,
+					startOfSqlBlock:          13,
+					endOfSqlBlock:            13,
+					sqlBlockContent:          `SELECT * FROM electric_cars WHERE model = $1;`,
+					formattedSqlBlockContent: "",
+				},
 			},
-        wantErr: false,
+			wantErr: false,
 		},
-        {
+		{
 			name: "Pre operations query after config block",
 			content: `
 config {
@@ -79,13 +79,13 @@ pre_operations {
 }
 
 SELECT * FROM electric_cars WHERE model = $1;`,
-expected: sqlxParserMeta{
-				numLines:        21,
-                configBlockMeta: ConfigBlockMeta {
-                    exsists: true,
-                    startOfConfigBlock: 2,
-                    endOfConfigBlock:   12,
-			configBlockContent: `
+			expected: sqlxParserMeta{
+				numLines: 21,
+				configBlockMeta: ConfigBlockMeta{
+					exsists:            true,
+					startOfConfigBlock: 2,
+					endOfConfigBlock:   12,
+					configBlockContent: `
 config {
     type: "table",
     schema: "electric_cars",
@@ -97,18 +97,32 @@ config {
     },
     tags: ["TAG_1"]
 }`,
-                    },
-                    sqlBlocksMeta: SqlBlockMeta {
-                    exsists: true,
-                    startOfSqlBlock: 21,
-                    endOfSqlBlock: 21,
-				sqlBlockContent: `SELECT * FROM electric_cars WHERE model = $1;`,
-                        formattedSqlBlockContent: "",
-                    },
+				},
+				sqlBlocksMeta: SqlBlockMeta{
+					exsists:                  true,
+					startOfSqlBlock:          21,
+					endOfSqlBlock:            21,
+					sqlBlockContent:          `SELECT * FROM electric_cars WHERE model = $1;`,
+					formattedSqlBlockContent: "",
+				},
+				preOpsBlocksMeta: []PreOpsBlockMeta{
+					{
+						exsists:                   true,
+						startOfPreOperationsBlock: 13,
+						endOfPreOperationsBlock:   19,
+						preOpsBlockContent: `pre_operations {
+    ${when(incremental(), ` + "`" + `DELETE
+    FROM
+        ${self()}
+    WHERE
+        DATE(PIPELINE_RUN_DATETIME) = CURRENT_DATE()` + "`" + `)}
+}`,
+					},
+				},
 			},
-        wantErr: false,
-        },
-    }
+			wantErr: false,
+		},
+	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -152,18 +166,28 @@ config {
 			if got.configBlockMeta.endOfConfigBlock != tt.expected.configBlockMeta.endOfConfigBlock {
 				t.Errorf("[got]:  configEndLine = %v, [want]:  %v", got.configBlockMeta.endOfConfigBlock, tt.expected.configBlockMeta.endOfConfigBlock)
 			}
-            if strings.TrimSpace(got.configBlockMeta.configBlockContent) != strings.TrimSpace(tt.expected.configBlockMeta.configBlockContent) {
+			if strings.TrimSpace(got.configBlockMeta.configBlockContent) != strings.TrimSpace(tt.expected.configBlockMeta.configBlockContent) {
 				t.Errorf("[got]:  configString = %v, [want]:  %v", got.configBlockMeta.configBlockContent, tt.expected.configBlockMeta.configBlockContent)
 			}
-            if strings.TrimSpace(got.sqlBlocksMeta.sqlBlockContent) != strings.TrimSpace(tt.expected.sqlBlocksMeta.sqlBlockContent) {
-                t.Errorf("[got]:  sqlBlockContent = %v, [want]:  %v", got.sqlBlocksMeta.sqlBlockContent, tt.expected.sqlBlocksMeta.sqlBlockContent)
-            }
+			if strings.TrimSpace(got.sqlBlocksMeta.sqlBlockContent) != strings.TrimSpace(tt.expected.sqlBlocksMeta.sqlBlockContent) {
+				t.Errorf("[got]:  sqlBlockContent = %v, [want]:  %v", got.sqlBlocksMeta.sqlBlockContent, tt.expected.sqlBlocksMeta.sqlBlockContent)
+			}
 
-            if (got.sqlBlocksMeta.startOfSqlBlock != tt.expected.sqlBlocksMeta.startOfSqlBlock) {
-                t.Errorf("[got]:  startOfSqlBlock = %v, [want]:  %v", got.sqlBlocksMeta.startOfSqlBlock, tt.expected.sqlBlocksMeta.startOfSqlBlock)
-            }
-            if (got.sqlBlocksMeta.endOfSqlBlock != tt.expected.sqlBlocksMeta.endOfSqlBlock) {
-                t.Errorf("[got]:  endOfSqlBlock = %v, [want]:  %v", got.sqlBlocksMeta.endOfSqlBlock, tt.expected.sqlBlocksMeta.endOfSqlBlock)
+			if got.sqlBlocksMeta.startOfSqlBlock != tt.expected.sqlBlocksMeta.startOfSqlBlock {
+				t.Errorf("[got]:  startOfSqlBlock = %v, [want]:  %v", got.sqlBlocksMeta.startOfSqlBlock, tt.expected.sqlBlocksMeta.startOfSqlBlock)
+			}
+			if got.sqlBlocksMeta.endOfSqlBlock != tt.expected.sqlBlocksMeta.endOfSqlBlock {
+				t.Errorf("[got]:  endOfSqlBlock = %v, [want]:  %v", got.sqlBlocksMeta.endOfSqlBlock, tt.expected.sqlBlocksMeta.endOfSqlBlock)
+			}
+
+            if len(tt.expected.preOpsBlocksMeta) > 0 {
+                if got.preOpsBlocksMeta[0].startOfPreOperationsBlock != tt.expected.preOpsBlocksMeta[0].startOfPreOperationsBlock {
+                    t.Errorf("[got]:  startOfPreOperationsBlock = %v, [want]:  %v", got.preOpsBlocksMeta[0].startOfPreOperationsBlock, tt.expected.preOpsBlocksMeta[0].startOfPreOperationsBlock)
+                }
+
+                if got.preOpsBlocksMeta[0].endOfPreOperationsBlock != tt.expected.preOpsBlocksMeta[0].endOfPreOperationsBlock {
+                    t.Errorf("[got]:  endOfPreOperationsBlock = %v, [want]:  %v", got.preOpsBlocksMeta[0].endOfPreOperationsBlock, tt.expected.preOpsBlocksMeta[0].endOfPreOperationsBlock)
+                }
             }
 
 		})

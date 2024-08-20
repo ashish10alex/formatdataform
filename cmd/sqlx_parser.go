@@ -148,11 +148,12 @@ func sqlxParser(filepath string) (sqlxParserMeta, error) {
 		} else if strings.Contains(lineContents, "}") && isInInnerMajorBlock && innerMajorBlockCount >= 1 && !inMajorBlock {
 			innerMajorBlockCount -= 1
 			currentBlockContent += lineContents
-		} else if lineContents != "" && !inMajorBlock {
+		} else if lineContents != "\n" && !inMajorBlock {
 			if startOfSqlBlock == 0 {
 				startOfSqlBlock = i
 				sqlBlockExsists = true
 				sqlBlockContent += lineContents
+				endOfSqlBlock = i
 			} else {
 				sqlBlockContent += lineContents
 				endOfSqlBlock = i
@@ -161,11 +162,6 @@ func sqlxParser(filepath string) (sqlxParserMeta, error) {
 			currentBlockContent += lineContents
 		}
 	}
-
-	// fmt.Println("configBlockContent: ", configBlockContent)
-	// fmt.Println("preOpsBlockContent: ", postOpsBlocksMeta[0].postOpsBlockContent)
-	// fmt.Println("postOpsBlockContent: ", postOpsBlocksMeta[0].postOpsBlockContent)
-	// fmt.Println("sqlBlockContent: ", sqlBlockContent)
 
 	return sqlxParserMeta{
 		filepath: filepath,

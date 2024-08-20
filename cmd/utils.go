@@ -159,6 +159,7 @@ func writeContentsToFileInPlace(sqlxFileMetaData *sqlxParserMeta, formattingErro
 
 func formatSqlxFile(sqlxFilePath string, inplace bool, sqlfluffConfigPath string, pythonExecutable string, logger *slog.Logger) {
     sqlxFileMetaData, err := sqlxParser(sqlxFilePath)
+    fmt.Printf("%+v\n", sqlxFileMetaData)
 	if err != nil {
 		fmt.Println("Error finding config blocks:", err)
 	} else {

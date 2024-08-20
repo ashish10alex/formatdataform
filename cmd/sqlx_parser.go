@@ -29,11 +29,11 @@ type PostOpsBlockMeta struct {
 }
 
 type SqlBlockMeta struct {
-	exsists         bool
-	startOfSqlBlock int
-	endOfSqlBlock   int
-	sqlBlockContent string
-    formattedSqlBlockContent string
+	exsists                  bool
+	startOfSqlBlock          int
+	endOfSqlBlock            int
+	sqlBlockContent          string
+	formattedSqlBlockContent string
 }
 
 type sqlxParserMeta struct {
@@ -179,11 +179,11 @@ func sqlxParser(filepath string) (sqlxParserMeta, error) {
 		preOpsBlocksMeta:  preOpsBlocksMeta,
 		postOpsBlocksMeta: postOpsBlocksMeta,
 		sqlBlocksMeta: SqlBlockMeta{
-			exsists:         sqlBlockExsists,
-			startOfSqlBlock: startOfSqlBlock,
-			endOfSqlBlock:   endOfSqlBlock,
-			sqlBlockContent: sqlBlockContent,
-            formattedSqlBlockContent: "",
+			exsists:                  sqlBlockExsists,
+			startOfSqlBlock:          startOfSqlBlock,
+			endOfSqlBlock:            endOfSqlBlock,
+			sqlBlockContent:          sqlBlockContent,
+			formattedSqlBlockContent: "",
 		},
 	}, nil
 }

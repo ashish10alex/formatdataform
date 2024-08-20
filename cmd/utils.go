@@ -78,6 +78,7 @@ func finalFormmatedSqlxFileContents(sqlxFileMetaData *sqlxParserMeta) string {
     spaceBetweenSameOps := "\n"
 
     formattedQuery := ""
+    prePostOpBlock := ""
 
     preOpsBlocks := sqlxFileMetaData.preOpsBlocksMeta
     postOpsBlocks := sqlxFileMetaData.postOpsBlocksMeta
@@ -96,11 +97,14 @@ func finalFormmatedSqlxFileContents(sqlxFileMetaData *sqlxParserMeta) string {
         }
     }
 
+    if preOpsBlockContent == "" && postOpsBlockContent == "" {
+        prePostOpBlock = ""
+    } else {
+        prePostOpBlock = spaceBetweenBlocks + preOpsBlockContent + spaceBetweenBlocks + postOpsBlockContent
+    }
+
     formattedQuery = sqlxFileMetaData.configBlockMeta.configBlockContent +
-                                                        spaceBetweenBlocks +
-                                                        preOpsBlockContent +
-                                                        spaceBetweenBlocks +
-                                                        postOpsBlockContent +
+                                                        prePostOpBlock +
                                                         spaceBetweenBlocks +
                                                         sqlxFileMetaData.sqlBlocksMeta.formattedSqlBlockContent
     return formattedQuery

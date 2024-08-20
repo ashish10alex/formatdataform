@@ -103,10 +103,12 @@ func sqlxParser(filepath string) (sqlxParserMeta, error) {
 			currentBlockContent += lineContents
 		} else if strings.Contains(lineContents, "{") && inMajorBlock {
 			if strings.Contains(lineContents, "}") {
+                currentBlockContent += lineContents
 				continue
-			}
-			isInInnerMajorBlock = true
-			innerMajorBlockCount += 1
+			} else {
+                isInInnerMajorBlock = true
+                innerMajorBlockCount += 1
+            }
 			currentBlockContent += lineContents
 		} else if strings.Contains(lineContents, "}") && isInInnerMajorBlock && innerMajorBlockCount >= 1 && inMajorBlock {
 			innerMajorBlockCount -= 1

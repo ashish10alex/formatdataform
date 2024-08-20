@@ -6,6 +6,29 @@ import (
 	"testing"
 )
 
+var simplePostOpsBlock = `
+post_operations {
+    select 1
+    union all
+    select 2
+}
+`
+
+var complexPreOpsBlock = `
+pre_operations {
+  ${when(incremental(),` +
+  "`" + `
+  DELETE
+  FROM
+    ${self()}
+  WHERE
+    DATE(SNAPSHOT_DATE) = CURRENT_DATE()` +
+  "`" + `
+    )
+  }
+}
+`
+
 func TestSqlxParser(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -69,18 +92,12 @@ config {
         clusterBy: ["CITY", "STATE"]
     },
     tags: ["TAG_1"]
-}
-pre_operations {
-  ${when(incremental(), ` + "`" + `DELETE
-  FROM
-    ${self()}
-  WHERE
-    DATE(PIPELINE_RUN_DATETIME) = CURRENT_DATE()` + "`" + `)}
-}
-
-SELECT * FROM electric_cars WHERE model = $1;`,
+}` + complexPreOpsBlock + simplePostOpsBlock + `
+SELECT * FROM electric_cars WHERE model = $1
+limit 100
+            `,
 			expected: sqlxParserMeta{
-				numLines: 21,
+				numLines: 32,
 				configBlockMeta: ConfigBlockMeta{
 					exsists:            true,
 					startOfConfigBlock: 2,
@@ -99,24 +116,28 @@ config {
 }`,
 				},
 				sqlBlocksMeta: SqlBlockMeta{
-					exsists:                  true,
-					startOfSqlBlock:          21,
-					endOfSqlBlock:            21,
-					sqlBlockContent:          `SELECT * FROM electric_cars WHERE model = $1;`,
+					exsists:         true,
+					startOfSqlBlock: 30,
+					endOfSqlBlock:   32,
+					sqlBlockContent: `SELECT * FROM electric_cars WHERE model = $1
+limit 100
+                    `,
 					formattedSqlBlockContent: "",
 				},
 				preOpsBlocksMeta: []PreOpsBlockMeta{
 					{
 						exsists:                   true,
 						startOfPreOperationsBlock: 13,
-						endOfPreOperationsBlock:   19,
-						preOpsBlockContent: `pre_operations {
-    ${when(incremental(), ` + "`" + `DELETE
-    FROM
-        ${self()}
-    WHERE
-        DATE(PIPELINE_RUN_DATETIME) = CURRENT_DATE()` + "`" + `)}
-}`,
+						endOfPreOperationsBlock:   22,
+						preOpsBlockContent:        strings.TrimPrefix(complexPreOpsBlock, "\n"),
+					},
+				},
+				postOpsBlocksMeta: []PostOpsBlockMeta{
+					{
+						exsists:                    true,
+						startOfpostOperationsBlock: 24,
+						endOfpostOperationsBlock:   28,
+						postOpsBlockContent:        strings.TrimPrefix(simplePostOpsBlock, "\n"),
 					},
 				},
 			},
@@ -180,15 +201,34 @@ config {
 				t.Errorf("[got]:  endOfSqlBlock = %v, [want]:  %v", got.sqlBlocksMeta.endOfSqlBlock, tt.expected.sqlBlocksMeta.endOfSqlBlock)
 			}
 
-            if len(tt.expected.preOpsBlocksMeta) > 0 {
-                if got.preOpsBlocksMeta[0].startOfPreOperationsBlock != tt.expected.preOpsBlocksMeta[0].startOfPreOperationsBlock {
-                    t.Errorf("[got]:  startOfPreOperationsBlock = %v, [want]:  %v", got.preOpsBlocksMeta[0].startOfPreOperationsBlock, tt.expected.preOpsBlocksMeta[0].startOfPreOperationsBlock)
-                }
+			if len(tt.expected.preOpsBlocksMeta) > 0 || len(tt.expected.preOpsBlocksMeta) > 0 {
 
-                if got.preOpsBlocksMeta[0].endOfPreOperationsBlock != tt.expected.preOpsBlocksMeta[0].endOfPreOperationsBlock {
-                    t.Errorf("[got]:  endOfPreOperationsBlock = %v, [want]:  %v", got.preOpsBlocksMeta[0].endOfPreOperationsBlock, tt.expected.preOpsBlocksMeta[0].endOfPreOperationsBlock)
-                }
-            }
+				if got.preOpsBlocksMeta[0].startOfPreOperationsBlock != tt.expected.preOpsBlocksMeta[0].startOfPreOperationsBlock {
+					t.Errorf("[got]:  startOfPreOperationsBlock = %v, [want]:  %v", got.preOpsBlocksMeta[0].startOfPreOperationsBlock, tt.expected.preOpsBlocksMeta[0].startOfPreOperationsBlock)
+				}
+
+				if got.preOpsBlocksMeta[0].endOfPreOperationsBlock != tt.expected.preOpsBlocksMeta[0].endOfPreOperationsBlock {
+					t.Errorf("[got]:  endOfPreOperationsBlock = %v, [want]:  %v", got.preOpsBlocksMeta[0].endOfPreOperationsBlock, tt.expected.preOpsBlocksMeta[0].endOfPreOperationsBlock)
+				}
+
+				if got.preOpsBlocksMeta[0].preOpsBlockContent != tt.expected.preOpsBlocksMeta[0].preOpsBlockContent {
+					t.Errorf("[got]:  preOpsBlockContent = %q, [want]:  %q", got.preOpsBlocksMeta[0].preOpsBlockContent, tt.expected.preOpsBlocksMeta[0].preOpsBlockContent)
+				}
+
+			}
+
+			if len(tt.expected.postOpsBlocksMeta) > 0 || len(tt.expected.postOpsBlocksMeta) > 0 {
+				if got.postOpsBlocksMeta[0].startOfpostOperationsBlock != tt.expected.postOpsBlocksMeta[0].startOfpostOperationsBlock {
+					t.Errorf("[got]:  startOfpostOperationsBlock = %v, [want]:  %v", got.postOpsBlocksMeta[0].startOfpostOperationsBlock, tt.expected.postOpsBlocksMeta[0].startOfpostOperationsBlock)
+				}
+
+				if got.postOpsBlocksMeta[0].endOfpostOperationsBlock != tt.expected.postOpsBlocksMeta[0].endOfpostOperationsBlock {
+					t.Errorf("[got]:  endOfpostOperationsBlock = %v, [want]:  %v", got.postOpsBlocksMeta[0].endOfpostOperationsBlock, tt.expected.postOpsBlocksMeta[0].endOfpostOperationsBlock)
+				}
+				if got.postOpsBlocksMeta[0].postOpsBlockContent != tt.expected.postOpsBlocksMeta[0].postOpsBlockContent {
+					t.Errorf("[got]:  postOpsBlockContent = %q, [want]:  %q", got.postOpsBlocksMeta[0].postOpsBlockContent, tt.expected.postOpsBlocksMeta[0].postOpsBlockContent)
+				}
+			}
 
 		})
 	}

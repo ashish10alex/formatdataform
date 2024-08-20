@@ -159,7 +159,7 @@ func writeContentsToFileInPlace(sqlxFileMetaData *sqlxParserMeta, formattingErro
 
 func formatSqlxFile(sqlxFilePath string, inplace bool, sqlfluffConfigPath string, pythonExecutable string, logger *slog.Logger) {
     sqlxFileMetaData, err := sqlxParser(sqlxFilePath)
-    fmt.Printf("%+v\n", sqlxFileMetaData)
+    // fmt.Printf("%+v\n", sqlxFileMetaData)
 	if err != nil {
 		fmt.Println("Error finding config blocks:", err)
 	} else {
@@ -182,34 +182,6 @@ func getIoReader(filepath string) (io.Reader, error) {
 		return nil, err
 	}
 	return file, nil
-}
-
-// Gives number of lines by reading the file in chunks, supposed to be faster than lineCounterV1 (https://stackoverflow.com/questions/24562942/golang-how-do-i-determine-the-number-of-lines-in-a-file-efficiently)
-
-func lineCounterV3(reader io.Reader) (int, error) {
-	buf := make([]byte, 32*1024)
-	count := 0
-	lineSep := []byte{'\n'}
-
-	for {
-		c, err := reader.Read(buf)
-		count += bytes.Count(buf[:c], lineSep)
-
-		switch {
-		case err == io.EOF:
-			return count, nil
-		case err != nil:
-			return count, err
-		}
-	}
-}
-
-func countLinesInFile(filepath string) (int, error) {
-	reader, err := getIoReader(filepath)
-	if err != nil {
-		return 0, err
-	}
-	return lineCounterV3(reader)
 }
 
 func createFileFromText(text string, filepath string) error {

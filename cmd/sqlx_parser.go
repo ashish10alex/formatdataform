@@ -7,6 +7,12 @@ import (
 	"strings"
 )
 
+func countCurlyBraces(line string) (int, int) {
+	openBraces := strings.Count(line, "{")
+	closedBraces := strings.Count(line, "}")
+	return openBraces, closedBraces
+}
+
 type ConfigBlockMeta struct {
 	exsists            bool
 	startOfConfigBlock int
@@ -67,8 +73,8 @@ func sqlxParser(filepath string) (sqlxParserMeta, error) {
 	var sqlBlockExsists = false
 	var sqlBlockContent = ""
 
-	var isInInnerMajorBlock = false
-	var innerMajorBlockCount = 0
+	var openBracesCount = 0;
+	var closedBracesCount = 0;
 
 	var currentBlock = ""
 	var currentBlockContent = ""
@@ -85,35 +91,65 @@ func sqlxParser(filepath string) (sqlxParserMeta, error) {
 	for scanner.Scan() {
 		i++
 		var lineContents = scanner.Text() + "\n"
+		openBraces, closedBraces := countCurlyBraces(lineContents)
+		openBracesCount += openBraces
+		closedBracesCount += closedBraces
 
 		if strings.Contains(lineContents, "config {") {
 			inMajorBlock = true
 			currentBlock = "config"
 			startOfConfigBlock = i
 			currentBlockContent += lineContents
+
+			if (openBracesCount == closedBracesCount) && inMajorBlock {
+				configBlockContent = currentBlockContent
+				endOfConfigBlock = i
+				configBlockExsists = true
+				currentBlock = ""
+				currentBlockContent = ""
+			}
+
 		} else if strings.Contains(lineContents, "post_operations {") && !inMajorBlock {
 			startOfpostOperationsBlock = i
 			inMajorBlock = true
 			currentBlock = "post_operations"
 			currentBlockContent += lineContents
+
+			if (openBracesCount == closedBracesCount) && inMajorBlock {
+				endOfpostOperationsBlock = i
+				postOpsBlockMeta := PostOpsBlockMeta{
+					exsists:                    true,
+					startOfpostOperationsBlock: startOfpostOperationsBlock,
+					endOfpostOperationsBlock:   endOfpostOperationsBlock,
+					postOpsBlockContent:        currentBlockContent,
+				}
+				postOpsBlocksMeta = append(postOpsBlocksMeta, postOpsBlockMeta)
+				currentBlock = ""
+				currentBlockContent = ""
+				inMajorBlock = false
+			}
 		} else if strings.Contains(lineContents, "pre_operations {") && !inMajorBlock {
 			inMajorBlock = true
 			currentBlock = "pre_operations"
 			startOfPreOperationsBlock = i
 			currentBlockContent += lineContents
-		} else if strings.Contains(lineContents, "{") && inMajorBlock {
-			if strings.Contains(lineContents, "}") {
-                currentBlockContent += lineContents
-				continue
-			} else {
-                isInInnerMajorBlock = true
-                innerMajorBlockCount += 1
-            }
+
+			if (openBracesCount == closedBracesCount) && inMajorBlock {
+ 				endOfPreOperationsBlock = i
+				preOpsBlockMeta := PreOpsBlockMeta{
+					exsists:                   true,
+					startOfPreOperationsBlock: startOfPreOperationsBlock,
+					endOfPreOperationsBlock:   endOfPreOperationsBlock,
+					preOpsBlockContent:        currentBlockContent,
+				}
+				preOpsBlocksMeta = append(preOpsBlocksMeta, preOpsBlockMeta)
+				currentBlock = ""
+				currentBlockContent = ""
+				inMajorBlock = false
+			}
+		} else if inMajorBlock && (openBracesCount != closedBracesCount) {
 			currentBlockContent += lineContents
-		} else if strings.Contains(lineContents, "}") && isInInnerMajorBlock && innerMajorBlockCount >= 1 && inMajorBlock {
-			innerMajorBlockCount -= 1
-			currentBlockContent += lineContents
-		} else if strings.Contains(lineContents, "}") && innerMajorBlockCount == 0 && inMajorBlock {
+		} else if inMajorBlock && (openBracesCount == closedBracesCount) {
 			if currentBlock == "config" {
 				currentBlockContent += lineContents
 				configBlockContent = currentBlockContent
@@ -147,9 +183,6 @@ func sqlxParser(filepath string) (sqlxParserMeta, error) {
 				currentBlockContent = ""
 			}
 			inMajorBlock = false
-		} else if strings.Contains(lineContents, "}") && isInInnerMajorBlock && innerMajorBlockCount >= 1 && !inMajorBlock {
-			innerMajorBlockCount -= 1
-			currentBlockContent += lineContents
 		} else if lineContents != "\n" && !inMajorBlock {
 			if startOfSqlBlock == 0 {
 				startOfSqlBlock = i

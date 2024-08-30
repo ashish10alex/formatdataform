@@ -130,7 +130,7 @@ quoted_identifiers_policy = none
 
 
 [sqlfluff:templater:placeholder]
-param_regex = \$\{self\(\)\}|\${ref\(\"\d*([\w]+)"\)\}|\${ref\(\'\d*([\w]+)'\)\}|\$\{[^}]*\}`)
+param_regex = (?s)\$\{\s*self\s*\(\s*\)\s*\}|\$\{\s*ref\s*\(\s*(\"?\w+\"?|\{[^}]+\})\s*\)\s*\}|\$\{\s*ref\s*\(\s*\'\s*\d*\s*([\w]+)\s*\'\s*\)\s*\}|\$\{\s*[^}]*\s*\}`)
 	for j := 1; j < 30; j++ {
 		sqlfluffConfig += fmt.Sprintf(`
 %d  = %s`, j, "my_table_or_replacement")

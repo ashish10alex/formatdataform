@@ -29,6 +29,7 @@ pre_operations {
 }
 `
 
+
 func TestSqlxParser(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -143,6 +144,51 @@ limit 100
 			},
 			wantErr: false,
 		},
+		{
+					name: "Config block with multiple curly braces in a single line",
+					content: `
+config {
+    type: 'table',
+    schema: 'yyy',
+    description: 'some descrtition', bigquery: { partitionBy: "foo",
+        clusterBy: ["bar", "baz"],
+    }, tags: ["tag1", "tag2"] }
+SELECT
+  FOO
+  , BAR
+  , BAZ
+FROM ${ref({schema:'dataset_name', name:'table_name'})}
+`,
+					expected: sqlxParserMeta{
+						numLines: 12,
+						configBlockMeta: ConfigBlockMeta{
+							exsists:            true,
+							startOfConfigBlock: 2,
+							endOfConfigBlock:   7,
+							configBlockContent: `
+config {
+    type: 'table',
+    schema: 'yyy',
+    description: 'some descrtition', bigquery: { partitionBy: "foo",
+        clusterBy: ["bar", "baz"],
+    }, tags: ["tag1", "tag2"] }
+`,
+						},
+						sqlBlocksMeta: SqlBlockMeta{
+							exsists:         true,
+							startOfSqlBlock: 8,
+							endOfSqlBlock:   12,
+							sqlBlockContent: `SELECT
+  FOO
+  , BAR
+  , BAZ
+FROM ${ref({schema:'dataset_name', name:'table_name'})}
+`,
+							formattedSqlBlockContent: "",
+						},
+					},
+					wantErr: false,
+				},
 	}
 
 	for _, tt := range tests {
